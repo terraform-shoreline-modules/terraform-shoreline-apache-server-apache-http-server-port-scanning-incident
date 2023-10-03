@@ -1,0 +1,134 @@
+{
+  "name": "apache_http_server_port_scanning_incident",
+  "description": "An Apache HTTP Server Port Scanning Incident refers to a situation where an unauthorized individual or system is attempting to scan the open ports on a server running Apache HTTP software. This type of incident is typically seen as a security threat and could be an attempt to exploit vulnerabilities in the server or steal sensitive information. It is crucial to detect and address these incidents swiftly to prevent potential harm to the system and its users.",
+  "params": [
+    {
+      "name": "APACHE_ERROR_LOG_PATH",
+      "value": ""
+    },
+    {
+      "name": "APACHE_ACCESS_LOG_PATH",
+      "value": ""
+    },
+    {
+      "name": "DOCUMENT_ROOT_DIRECTORY",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Apache HTTP Server Port Scanning Incident\nAn Apache HTTP Server Port Scanning Incident refers to a situation where an unauthorized individual or system is attempting to scan the open ports on a server running Apache HTTP software. This type of incident is typically seen as a security threat and could be an attempt to exploit vulnerabilities in the server or steal sensitive information. It is crucial to detect and address these incidents swiftly to prevent potential harm to the system and its users."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Apache HTTP server is running"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status apache2`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Apache HTTP server is listening on the expected port"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo netstat -tuln | grep 443`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if there are any suspicious processes running on the system"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ps aux`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if there are any suspicious files in the Apache document root directory"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo find ${DOCUMENT_ROOT_DIRECTORY} -type f -name \"*.php\" -o -name \"*.sh\"`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Apache access logs for any suspicious activity"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo tail -1000f ${APACHE_ACCESS_LOG_PATH}`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Apache error logs for any suspicious activity"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo tail -1000f ${APACHE_ERROR_LOG_PATH}`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Block the IP address or range that initiated the port scanning activity using a firewall or network security device to prevent further scanning attempts."
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_block_ip_range()"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Implementing rate limiting in Apache HTTP Server"
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_configure_apache_rate_limit()"
+    }
+  ]
+}
